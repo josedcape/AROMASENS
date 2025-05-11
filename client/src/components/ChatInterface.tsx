@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { useLocation } from "wouter";
 import { useChatContext } from "@/context/ChatContext";
+import { useAISettings } from "@/context/AISettingsContext";
 import { ChatStep } from "@/lib/types";
 import { startChat, sendMessage, getRecommendation, sleep } from "@/lib/chatHelpers";
 import { Send, Bot, User, Sparkles } from "lucide-react";
 import logoImg from "@/assets/aromasens-logo.png";
+import SpeechRecognitionButton from "@/components/SpeechRecognitionButton";
+import { getMessages } from "@/lib/aiService";
 
 export default function ChatInterface() {
   const [, setLocation] = useLocation();
