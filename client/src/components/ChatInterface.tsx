@@ -159,7 +159,7 @@ export default function ChatInterface() {
         {/* Chat Progress Indicator */}
         <div className="w-full px-4 py-3 border-b border-border/50">
           <div className="flex justify-between mb-1">
-            <span className="text-xs text-foreground/70">Progreso</span>
+            <span className="text-xs text-foreground/70">{messages.loading}</span>
             <span className="text-xs text-accent">
               {Math.min(state.currentStep + 1, 4)}/4
             </span>
@@ -171,10 +171,10 @@ export default function ChatInterface() {
             ></div>
           </div>
           <div className="flex justify-between text-[10px] text-foreground/50 mt-1">
-            <span>Edad</span>
-            <span>Experiencia</span>
-            <span>Ocasión</span>
-            <span>Preferencias</span>
+            <span>{messages.age}</span>
+            <span>{messages.experience}</span>
+            <span>{messages.occasion}</span>
+            <span>{messages.preferences}</span>
           </div>
         </div>
         
