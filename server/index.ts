@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import dotenv from 'dotenv';
+import { storage } from "./storage";
 
 // Cargar variables de entorno desde .env
 dotenv.config();
@@ -41,6 +42,15 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Inicializar la base de datos
+  try {
+    await storage.initializeDatabase();
+    log("Base de datos inicializada correctamente");
+  } catch (error) {
+    console.error("Error al inicializar la base de datos:", error);
+    process.exit(1);
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
