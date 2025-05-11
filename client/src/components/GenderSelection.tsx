@@ -72,10 +72,16 @@ export default function GenderSelection() {
           onClick={() => handleSelectGender("femenino")}
         >
           <div className="relative h-64 md:h-80 overflow-hidden rounded-t-lg">
-            <div 
-              className="absolute inset-0 bg-cover bg-center transform hover:scale-110 transition-transform duration-700" 
-              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1595535873420-a599195b3f4a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600')" }}
-            />
+            <video 
+              autoPlay 
+              loop 
+              muted 
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
+            >
+              <source src="/women.mp4" type="video/mp4" />
+              Tu navegador no soporta videos HTML5.
+            </video>
             <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
           </div>
           
