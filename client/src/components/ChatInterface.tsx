@@ -31,7 +31,7 @@ export default function ChatInterface() {
       if (state.selectedGender && state.messages.length === 0) {
         try {
           dispatch({ type: "SET_TYPING", payload: true });
-          const response = await startChat(state.selectedGender);
+          const response = await startChat(state.selectedGender, settings.model);
           
           await sleep(1000); // Simulate typing delay
           
