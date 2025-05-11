@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { PerfumeRecommendation } from "@/lib/types";
 import { useChatContext } from "@/context/ChatContext";
+import { Store, ArrowLeft, Sparkles, Droplets, Clock, Heart } from "lucide-react";
+import logoImg from "@/assets/aromasens-logo.png";
 
 export default function Recommendation() {
   const [location, setLocation] = useLocation();

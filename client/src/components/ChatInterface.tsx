@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { useChatContext } from "@/context/ChatContext";
 import { ChatStep } from "@/lib/types";
 import { startChat, sendMessage, getRecommendation, sleep } from "@/lib/chatHelpers";
+import { Send, Bot, User, Sparkles } from "lucide-react";
+import logoImg from "@/assets/aromasens-logo.png";
 
 export default function ChatInterface() {
   const [, setLocation] = useLocation();
@@ -117,49 +119,88 @@ export default function ChatInterface() {
   };
   
   return (
-    <div className="container mx-auto px-4 h-full flex flex-col">
-      <div className="mb-6 text-center">
-        <h2 className="font-display text-2xl md:text-3xl text-primary">
-          AROMASENS
+    <div className="container mx-auto px-4 h-full flex flex-col pt-6 pb-10">
+      <div className="mb-8 text-center">
+        <div className="flex justify-center mb-4">
+          <div className="w-14 h-14 logo-container overflow-hidden">
+            <img 
+              src={logoImg} 
+              alt="AROMASENS Logo" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+        <h2 className="font-serif text-2xl md:text-3xl text-gradient font-bold mb-2">
+          ASISTENTE AROMASENS
         </h2>
-        <h3 className="font-display text-xl md:text-2xl text-secondary">
-          Asistente de Fragancias {state.selectedGender === "femenino" ? "Femeninas" : "Masculinas"}
-        </h3>
-        <p className="text-neutral-dark mt-2">
-          Conversa con nuestro asistente para encontrar tu perfume ideal
-        </p>
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <div className="h-px bg-accent/30 w-12"></div>
+          <h3 className="font-serif text-xl text-primary animate-pulse-subtle">
+            Perfumes {state.selectedGender === "femenino" ? "Femeninos" : "Masculinos"}
+          </h3>
+          <div className="h-px bg-accent/30 w-12"></div>
+        </div>
+        <div className="glass-effect py-2 px-4 rounded-full inline-flex items-center space-x-2 mb-4">
+          <Sparkles className="w-4 h-4 text-accent" />
+          <p className="text-foreground text-sm">
+            Descubriendo tu perfume ideal con IA
+          </p>
+        </div>
       </div>
       
-      <div className="bg-white rounded-xl shadow-lg p-4 flex-grow flex flex-col max-w-3xl mx-auto w-full">
+      <div className="futuristic-card flex-grow flex flex-col max-w-3xl mx-auto w-full bg-card/90 backdrop-blur-md">
+        {/* Chat Progress Indicator */}
+        <div className="w-full px-4 py-3 border-b border-border/50">
+          <div className="flex justify-between mb-1">
+            <span className="text-xs text-foreground/70">Progreso</span>
+            <span className="text-xs text-accent">
+              {Math.min(state.currentStep + 1, 4)}/4
+            </span>
+          </div>
+          <div className="w-full h-1 bg-border rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500"
+              style={{ width: `${Math.min((state.currentStep + 1) / 4 * 100, 100)}%` }}
+            ></div>
+          </div>
+          <div className="flex justify-between text-[10px] text-foreground/50 mt-1">
+            <span>Edad</span>
+            <span>Experiencia</span>
+            <span>Ocasión</span>
+            <span>Preferencias</span>
+          </div>
+        </div>
+        
         {/* Chat Messages */}
-        <div className="chat-container overflow-y-auto flex-grow scrollbar-hide p-2">
+        <div className="chat-container overflow-y-auto flex-grow p-4 md:p-6">
           <div className="flex flex-col space-y-4">
             {state.messages.map((message, index) => (
               <div
                 key={index}
                 className={`chat-message flex items-start ${
-                  message.role === "user" ? "justify-end mb-4" : "mb-4"
-                }`}
+                  message.role === "user" ? "justify-end" : ""
+                } animate-in fade-in-0 duration-300 ease-in-out`}
+                style={{ animationDelay: `${index * 150}ms` }}
               >
                 {message.role === "assistant" && (
-                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white flex-shrink-0 mr-3">
-                    <i className="ri-user-smile-line"></i>
+                  <div className="w-10 h-10 rounded-full bg-primary/10 backdrop-blur-sm flex items-center justify-center border border-primary/20 flex-shrink-0 mr-3">
+                    <Bot className="w-5 h-5 text-primary" />
                   </div>
                 )}
                 
                 <div
                   className={`${
                     message.role === "user"
-                      ? "bg-primary text-white"
-                      : "bg-neutral-light"
-                  } rounded-lg py-2 px-4 max-w-[80%]`}
+                      ? "bg-accent/10 border border-accent/20 text-foreground"
+                      : "glass-effect text-foreground"
+                  } rounded-2xl py-3 px-4 max-w-[85%] shadow-sm`}
                 >
-                  <p>{message.content}</p>
+                  <p className="leading-relaxed">{message.content}</p>
                 </div>
                 
                 {message.role === "user" && (
-                  <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-white flex-shrink-0 ml-3">
-                    <i className="ri-user-line"></i>
+                  <div className="w-10 h-10 rounded-full bg-accent/10 backdrop-blur-sm flex items-center justify-center border border-accent/20 flex-shrink-0 ml-3">
+                    <User className="w-5 h-5 text-accent" />
                   </div>
                 )}
               </div>
@@ -167,16 +208,16 @@ export default function ChatInterface() {
             
             {/* Typing indicator */}
             {state.isTyping && (
-              <div className="chat-message flex items-start mb-4">
-                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white flex-shrink-0 mr-3">
-                  <i className="ri-user-smile-line"></i>
+              <div className="chat-message flex items-start">
+                <div className="w-10 h-10 rounded-full bg-primary/10 backdrop-blur-sm flex items-center justify-center border border-primary/20 flex-shrink-0 mr-3">
+                  <Bot className="w-5 h-5 text-primary" />
                 </div>
-                <div className="bg-neutral-light rounded-lg py-2 px-4">
-                  <p className="flex space-x-1">
-                    <span className="animate-bounce">.</span>
-                    <span className="animate-bounce" style={{ animationDelay: "0.1s" }}>.</span>
-                    <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>.</span>
-                  </p>
+                <div className="glass-effect rounded-2xl py-3 px-6">
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.3s" }}></div>
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.6s" }}></div>
+                  </div>
                 </div>
               </div>
             )}
@@ -185,33 +226,45 @@ export default function ChatInterface() {
         </div>
         
         {/* Chat Input */}
-        <div className="mt-4 border-t pt-4">
+        <div className="p-4 border-t border-border/50 bg-card/30">
           <form onSubmit={handleSendMessage} className="flex items-center">
-            <input
-              type="text"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              className="flex-grow border border-neutral rounded-l-lg py-3 px-4 focus:outline-none focus:ring-1 focus:ring-secondary"
-              placeholder="Escribe tu respuesta..."
-              disabled={state.isTyping || isProcessing}
-            />
+            <div className="relative flex-grow">
+              <input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                className="w-full bg-background/50 backdrop-blur-sm border border-border rounded-l-full py-3 px-5 pr-12 focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-all duration-300"
+                placeholder="Escribe tu respuesta..."
+                disabled={state.isTyping || isProcessing}
+              />
+              <button
+                type="submit"
+                className="absolute right-0 top-0 bottom-0 px-4 flex items-center justify-center btn-animated disabled:opacity-50"
+                disabled={state.isTyping || isProcessing || !userInput.trim()}
+              >
+                <Send className={`w-5 h-5 ${userInput.trim() ? 'text-accent' : 'text-muted-foreground'}`} />
+              </button>
+            </div>
             <button
               type="submit"
-              className="bg-secondary hover:bg-secondary-light text-white py-3 px-6 rounded-r-lg transition-colors disabled:opacity-50"
+              className={`bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary text-white py-3 px-6 rounded-r-full transition-all duration-300 disabled:opacity-50 btn-animated ${
+                !userInput.trim() || state.isTyping || isProcessing ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
               disabled={state.isTyping || isProcessing || !userInput.trim()}
             >
-              <i className="ri-send-plane-fill"></i>
+              Enviar
             </button>
           </form>
           
           {/* Quick Responses */}
           {state.quickResponses && state.quickResponses.length > 0 && !state.isTyping && (
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="flex flex-wrap gap-2 mt-4">
               {state.quickResponses.map((response, index) => (
                 <button
                   key={index}
                   onClick={() => handleQuickResponse(response)}
-                  className="py-2 px-4 bg-neutral hover:bg-neutral-dark text-primary rounded-full text-sm transition-colors"
+                  className="py-2 px-4 bg-accent/10 backdrop-blur-sm hover:bg-accent/20 text-accent rounded-full text-sm transition-all duration-300 border border-accent/20 hover-glow"
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {response}
                 </button>
