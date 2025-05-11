@@ -78,6 +78,10 @@ export type ChatSession = typeof chatSessions.$inferSelect;
 export type InsertRecommendation = z.infer<typeof insertRecommendationSchema>;
 export type Recommendation = typeof recommendations.$inferSelect;
 
+// Enumeración para los modelos de IA disponibles
+export const aiModelEnum = z.enum(['openai', 'anthropic', 'gemini']);
+export type AIModelType = z.infer<typeof aiModelEnum>;
+
 // Chat related schemas
 export const chatPreferencesSchema = z.object({
   age: z.string(),
@@ -92,14 +96,16 @@ export type ChatPreferences = z.infer<typeof chatPreferencesSchema>;
 export const startChatSchema = z.object({
   gender: z.string().refine(val => val === "femenino" || val === "masculino", {
     message: "Gender must be 'femenino' or 'masculino'"
-  })
+  }),
+  model: aiModelEnum.optional()
 });
 
 export const sendMessageSchema = z.object({
   sessionId: z.string().optional(),
   message: z.string().min(1, "Message cannot be empty"),
   gender: z.string().optional(),
-  step: z.number().optional()
+  step: z.number().optional(),
+  model: aiModelEnum.optional()
 });
 
 export const chatResponseSchema = z.object({

@@ -138,19 +138,19 @@ export default function ChatInterface() {
           </div>
         </div>
         <h2 className="font-serif text-2xl md:text-3xl text-gradient font-bold mb-2">
-          ASISTENTE AROMASENS
+          {messages.perfumeAssistant}
         </h2>
         <div className="flex items-center justify-center gap-2 mb-3">
           <div className="h-px bg-accent/30 w-12"></div>
           <h3 className="font-serif text-xl text-primary animate-pulse-subtle">
-            Perfumes {state.selectedGender === "femenino" ? "Femeninos" : "Masculinos"}
+            {state.selectedGender === "femenino" ? messages.feminine : messages.masculine}
           </h3>
           <div className="h-px bg-accent/30 w-12"></div>
         </div>
         <div className="glass-effect py-2 px-4 rounded-full inline-flex items-center space-x-2 mb-4">
           <Sparkles className="w-4 h-4 text-accent" />
           <p className="text-foreground text-sm">
-            Descubriendo tu perfume ideal con IA
+            {messages.idealPerfume}
           </p>
         </div>
       </div>
