@@ -78,8 +78,9 @@ export default function GenderSelection() {
               muted 
               playsInline
               className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
+              style={{ objectFit: "cover", objectPosition: "center" }}
             >
-              <source src="/women.mp4" type="video/mp4" />
+              <source src="./women.mp4" type="video/mp4" />
               Tu navegador no soporta videos HTML5.
             </video>
             <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
