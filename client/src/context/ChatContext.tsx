@@ -9,10 +9,12 @@ type ChatAction =
   | { type: "SET_QUICK_RESPONSES"; payload: string[] | undefined }
   | { type: "SET_USER_RESPONSE"; payload: { key: string; value: string } }
   | { type: "SET_RECOMMENDATION"; payload: PerfumeRecommendation }
+  | { type: "SET_LANGUAGE"; payload: 'es' | 'en' }
   | { type: "RESET" };
 
 const initialState: ChatState = {
   selectedGender: "",
+  selectedLanguage: undefined, // Inicialmente sin idioma seleccionado
   currentStep: ChatStep.AGE,
   messages: [],
   isTyping: false,
@@ -76,6 +78,12 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
           ...state.userResponses,
           [action.payload.key]: action.payload.value,
         },
+      };
+      
+    case "SET_LANGUAGE":
+      return {
+        ...state,
+        selectedLanguage: action.payload,
       };
 
     case "RESET":

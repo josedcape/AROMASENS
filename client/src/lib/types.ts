@@ -13,17 +13,18 @@ export enum ChatStep {
 
 export interface ChatState {
   selectedGender: string;
+  selectedLanguage?: 'es' | 'en';
   currentStep: ChatStep;
   messages: ChatMessage[];
-  quickResponses?: string[];
   isTyping: boolean;
+  quickResponses?: string[];
   userResponses: {
     gender: string;
     age: string;
-    experience: string;
+    experience: string; 
     occasion: string;
     preferences: string;
-  }
+  };
 }
 
 export interface PerfumeRecommendation {

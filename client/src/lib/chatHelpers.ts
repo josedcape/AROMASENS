@@ -2,8 +2,8 @@ import { apiRequest } from "./queryClient";
 import { ChatStep, type ChatState, type ApiResponse } from "./types";
 import { AIModel } from "./aiService";
 
-export async function startChat(gender: string, model: AIModel = 'openai'): Promise<ApiResponse> {
-  const response = await apiRequest("POST", "/api/chat/start", { gender, model });
+export async function startChat(gender: string, model: AIModel = 'openai', language: 'es' | 'en' = 'es'): Promise<ApiResponse> {
+  const response = await apiRequest("POST", "/api/chat/start", { gender, model, language });
   return await response.json();
 }
 
@@ -11,17 +11,18 @@ export async function sendMessage(
   message: string, 
   gender: string, 
   step: ChatStep,
-  model: AIModel = 'openai'
+  model: AIModel = 'openai',
+  language: 'es' | 'en' = 'es'
 ): Promise<ApiResponse> {
   const response = await apiRequest(
     "POST", 
     "/api/chat/message", 
-    { message, gender, step, model }
+    { message, gender, step, model, language }
   );
   return await response.json();
 }
 
-export async function getRecommendation(chatState: ChatState, model: AIModel = 'openai'): Promise<ApiResponse> {
+export async function getRecommendation(chatState: ChatState, model: AIModel = 'openai', language: 'es' | 'en' = 'es'): Promise<ApiResponse> {
   const { userResponses } = chatState;
   
   const response = await apiRequest(
@@ -33,7 +34,8 @@ export async function getRecommendation(chatState: ChatState, model: AIModel = '
       experience: userResponses.experience,
       occasion: userResponses.occasion,
       preferences: userResponses.preferences,
-      model
+      model,
+      language
     }
   );
   

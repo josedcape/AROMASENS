@@ -94,10 +94,10 @@ export type ChatPreferences = z.infer<typeof chatPreferencesSchema>;
 
 // API schemas
 export const startChatSchema = z.object({
-  gender: z.string().refine(val => val === "femenino" || val === "masculino", {
-    message: "Gender must be 'femenino' or 'masculino'"
+  gender: z.string().refine(val => ["masculino", "femenino"].includes(val.toLowerCase()), {
+    message: "Gender must be either 'masculino' or 'femenino'"
   }),
-  model: aiModelEnum.optional()
+  language: z.enum(['es', 'en']).optional().default('es')
 });
 
 export const sendMessageSchema = z.object({

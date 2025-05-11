@@ -9,7 +9,7 @@ import { AIModel } from "../services/ai.service";
 
 export async function handleStartChat(req: Request, res: Response) {
   try {
-    const { gender, model = 'openai' } = req.body;
+    const { gender, model = 'openai', language = 'es' } = req.body;
     
     // Validamos el género con el esquema
     const validatedData = startChatSchema.parse({ gender });
@@ -17,8 +17,11 @@ export async function handleStartChat(req: Request, res: Response) {
     // Validamos el modelo de IA
     const validModel = validateAIModel(model);
     
-    // Iniciamos la sesión con el modelo seleccionado
-    const response = await startChatSession(validatedData.gender, validModel);
+    // Validamos el idioma
+    const validLanguage = validateLanguage(language);
+    
+    // Iniciamos la sesión con el modelo e idioma seleccionados
+    const response = await startChatSession(validatedData.gender, validModel, validLanguage);
     
     res.status(200).json(response);
   } catch (error) {
@@ -29,7 +32,7 @@ export async function handleStartChat(req: Request, res: Response) {
 
 export async function handleSendMessage(req: Request, res: Response) {
   try {
-    const { message, gender, step, model = 'openai' } = req.body;
+    const { message, gender, step, model = 'openai', language = 'es' } = req.body;
     
     // Validamos los datos del mensaje
     const validatedData = sendMessageSchema.parse({ message, gender, step });
@@ -41,12 +44,16 @@ export async function handleSendMessage(req: Request, res: Response) {
     // Validamos el modelo de IA
     const validModel = validateAIModel(model);
     
-    // Procesamos el mensaje con el modelo seleccionado
+    // Validamos el idioma
+    const validLanguage = validateLanguage(language);
+    
+    // Procesamos el mensaje con el modelo e idioma seleccionados
     const response = await processUserMessage(
       validatedData.message, 
       validatedData.gender, 
       validatedData.step,
-      validModel
+      validModel,
+      validLanguage
     );
     
     res.status(200).json(response);
@@ -58,7 +65,7 @@ export async function handleSendMessage(req: Request, res: Response) {
 
 export async function handleGetRecommendation(req: Request, res: Response) {
   try {
-    const { gender, age, experience, occasion, preferences, model = 'openai' } = req.body;
+    const { gender, age, experience, occasion, preferences, model = 'openai', language = 'es' } = req.body;
     
     // Validate the chat preferences
     const validatedPreferences = chatPreferencesSchema.parse({
@@ -71,11 +78,15 @@ export async function handleGetRecommendation(req: Request, res: Response) {
     // Validamos el modelo de IA
     const validModel = validateAIModel(model);
     
-    // Generamos la recomendación con el modelo seleccionado
+    // Validamos el idioma
+    const validLanguage = validateLanguage(language);
+    
+    // Generamos la recomendación con el modelo e idioma seleccionados
     const recommendation = await generateRecommendation(
       gender, 
       validatedPreferences,
-      validModel
+      validModel,
+      validLanguage
     );
     
     res.status(200).json(recommendation);
@@ -95,4 +106,14 @@ function validateAIModel(model: string): AIModel {
   }
   
   return model as AIModel;
+}
+
+// Función auxiliar para validar el idioma
+function validateLanguage(language: string): 'es' | 'en' {
+  if (language !== 'es' && language !== 'en') {
+    console.warn(`Idioma inválido: ${language}, usando español por defecto`);
+    return 'es';
+  }
+  
+  return language as 'es' | 'en';
 }

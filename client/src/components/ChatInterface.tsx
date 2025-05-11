@@ -31,7 +31,30 @@ export default function ChatInterface() {
       if (state.selectedGender && state.messages.length === 0) {
         try {
           dispatch({ type: "SET_TYPING", payload: true });
-          const response = await startChat(state.selectedGender, settings.model);
+          
+          // Si no se ha seleccionado idioma, mostrar mensaje de selección de idioma
+          if (!state.selectedLanguage) {
+            await sleep(500);
+            dispatch({
+              type: "ADD_MESSAGE",
+              payload: { 
+                role: "assistant", 
+                content: "👋 ¡Hola! Hello! ¿En qué idioma prefieres comunicarte? / In which language would you prefer to communicate?" 
+              },
+            });
+            
+            // Ofrecer opciones rápidas para seleccionar idioma
+            dispatch({ 
+              type: "SET_QUICK_RESPONSES", 
+              payload: ["Español", "English"] 
+            });
+            
+            dispatch({ type: "SET_TYPING", payload: false });
+            return;
+          }
+          
+          // Si ya se seleccionó el idioma, iniciar el chat normal
+          const response = await startChat(state.selectedGender, settings.model, state.selectedLanguage);
           
           await sleep(1000); // Simulate typing delay
           
@@ -52,7 +75,7 @@ export default function ChatInterface() {
     };
     
     initializeChat();
-  }, [state.selectedGender, state.messages.length, dispatch]);
+  }, [state.selectedGender, state.messages.length, state.selectedLanguage, dispatch, settings.model]);
   
   const handleSendMessage = async (e?: FormEvent) => {
     if (e) e.preventDefault();
@@ -68,6 +91,63 @@ export default function ChatInterface() {
         payload: { role: "user", content: userInput },
       });
       
+      // Detectar si es selección de idioma (solo si aún no hay idioma seleccionado)
+      if (!state.selectedLanguage && state.messages.length === 1) {
+        const userInputLower = userInput.toLowerCase().trim();
+        let detectedLanguage: 'es' | 'en' = 'es'; // Default to Spanish
+        
+        // Detectar idioma basado en la respuesta
+        if (userInputLower === 'english' || 
+            userInputLower === 'en' || 
+            userInputLower === 'inglés' ||
+            userInputLower === 'ingles' ||
+            userInputLower.includes('english')) {
+          detectedLanguage = 'en';
+        }
+        
+        // Establecer el idioma seleccionado
+        dispatch({ type: "SET_LANGUAGE", payload: detectedLanguage });
+        
+        // Actualizar los ajustes de IA con el nuevo idioma
+        settings.updateSettings({ language: detectedLanguage });
+        
+        // Clear input and set typing indicator
+        setUserInput("");
+        dispatch({ type: "SET_TYPING", payload: true });
+        
+        // Responder acorde al idioma seleccionado
+        await sleep(1000);
+        
+        const welcomeMessage = detectedLanguage === 'en' 
+          ? "Thank you! I'll communicate with you in English from now on. Let's continue with your perfume selection."
+          : "¡Gracias! Me comunicaré contigo en español a partir de ahora. Continuemos con tu selección de perfume.";
+        
+        dispatch({
+          type: "ADD_MESSAGE",
+          payload: { role: "assistant", content: welcomeMessage },
+        });
+        
+        // Iniciar el chat normal después de la selección de idioma
+        await sleep(500);
+        const response = await startChat(state.selectedGender, settings.model, detectedLanguage);
+        
+        await sleep(1000);
+        
+        dispatch({
+          type: "ADD_MESSAGE",
+          payload: { role: "assistant", content: response.message },
+        });
+        
+        if (response.quickResponses) {
+          dispatch({ type: "SET_QUICK_RESPONSES", payload: response.quickResponses });
+        }
+        
+        dispatch({ type: "SET_TYPING", payload: false });
+        setIsProcessing(false);
+        return;
+      }
+      
+      // Proceso normal para mensajes después de selección de idioma
       // Store user response based on current step
       const responseKey = Object.keys(state.userResponses)[state.currentStep + 1]; // +1 because gender is already set
       dispatch({
@@ -86,7 +166,8 @@ export default function ChatInterface() {
         userInput,
         state.selectedGender,
         state.currentStep,
-        settings.model
+        settings.model,
+        state.selectedLanguage
       );
       
       // Move to next step
@@ -107,7 +188,7 @@ export default function ChatInterface() {
       if (response.isComplete || state.currentStep >= ChatStep.COMPLETE) {
         // Generate recommendation
         await sleep(1000);
-        const recommendation = await getRecommendation(state, settings.model);
+        const recommendation = await getRecommendation(state, settings.model, state.selectedLanguage);
         setLocation("/recommendation", { 
           state: { recommendation: recommendation.recommendation } 
         });
@@ -122,6 +203,24 @@ export default function ChatInterface() {
   };
   
   const handleQuickResponse = (response: string) => {
+    // Si es selección de idioma y no hay idioma seleccionado
+    if (!state.selectedLanguage && state.messages.length === 1 && 
+        (response === "Español" || response === "English")) {
+      const detectedLanguage: 'es' | 'en' = response === "English" ? 'en' : 'es';
+      
+      // Establecer el idioma directamente aquí
+      dispatch({ type: "SET_LANGUAGE", payload: detectedLanguage });
+      
+      // Actualizar los ajustes de IA
+      settings.updateSettings({ language: detectedLanguage });
+      
+      // Enviar el mensaje seleccionado
+      setUserInput(response);
+      handleSendMessage();
+      return;
+    }
+    
+    // Caso normal para otras respuestas rápidas
     setUserInput(response);
     handleSendMessage();
   };
