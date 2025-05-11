@@ -12,7 +12,7 @@ import { getMessages } from "@/lib/aiService";
 export default function ChatInterface() {
   const [, setLocation] = useLocation();
   const { state, dispatch } = useChatContext();
-  const { settings } = useAISettings();
+  const { settings, setLanguage } = useAISettings();
   const [userInput, setUserInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -109,7 +109,7 @@ export default function ChatInterface() {
         dispatch({ type: "SET_LANGUAGE", payload: detectedLanguage });
         
         // Actualizar los ajustes de IA con el nuevo idioma
-        settings.updateSettings({ language: detectedLanguage });
+        setLanguage(detectedLanguage);
         
         // Clear input and set typing indicator
         setUserInput("");
@@ -212,7 +212,7 @@ export default function ChatInterface() {
       dispatch({ type: "SET_LANGUAGE", payload: detectedLanguage });
       
       // Actualizar los ajustes de IA
-      settings.updateSettings({ language: detectedLanguage });
+      setLanguage(detectedLanguage);
       
       // Enviar el mensaje seleccionado
       setUserInput(response);
