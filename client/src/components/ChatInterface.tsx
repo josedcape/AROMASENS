@@ -85,7 +85,8 @@ export default function ChatInterface() {
       const response = await sendMessage(
         userInput,
         state.selectedGender,
-        state.currentStep
+        state.currentStep,
+        settings.model
       );
       
       // Move to next step
@@ -106,7 +107,7 @@ export default function ChatInterface() {
       if (response.isComplete || state.currentStep >= ChatStep.COMPLETE) {
         // Generate recommendation
         await sleep(1000);
-        const recommendation = await getRecommendation(state);
+        const recommendation = await getRecommendation(state, settings.model);
         setLocation("/recommendation", { 
           state: { recommendation: recommendation.recommendation } 
         });
