@@ -30,11 +30,14 @@ export async function generatePerfumeProfile(preferences: ChatPreferences): Prom
     - Preferencias personales: ${preferences.preferences}
 
     Por favor crea un perfil psicológico detallado y recomienda un perfume específico que se adapte a su personalidad y necesidades.
+    
+    Para la parte de recommendationReason, asegúrate de incluir emojis para resaltar puntos importantes y usa formato markdown para que la respuesta esté bien presentada visualmente. Incluye encabezados, listas o negritas cuando sea apropiado.
+    
     Es importante que devuelvas la respuesta en formato JSON con la siguiente estructura exacta:
     {
       "psychologicalProfile": "Análisis psicológico detallado basado en las respuestas",
       "recommendedPerfumeId": número entre 1 y 20,
-      "recommendationReason": "Explicación detallada de por qué este perfume se adapta al perfil"
+      "recommendationReason": "Explicación detallada en formato markdown con emojis de por qué este perfume se adapta al perfil"
     }
     `;
 

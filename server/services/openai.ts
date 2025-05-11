@@ -11,7 +11,7 @@ function readEnvFile() {
     if (fs.existsSync(envPath)) {
       const envContent = fs.readFileSync(envPath, 'utf8');
       const envVars: Record<string, string> = {};
-      
+
       envContent.split('\n').forEach(line => {
         const match = line.match(/^([^=]+)=(.*)$/);
         if (match) {
@@ -24,7 +24,7 @@ function readEnvFile() {
           }
         }
       });
-      
+
       return envVars;
     }
   } catch (error) {
@@ -84,7 +84,7 @@ export async function generatePerfumeProfile(
 ): Promise<PerfumeProfile> {
   try {
     console.log("Generando perfil de perfume para:", gender, preferences);
-    
+
     // Primero intentamos usar OpenAI
     if (openai) {
       try {
@@ -130,13 +130,13 @@ export async function generatePerfumeProfile(
         const content = response.choices[0].message.content;
         if (content) {
           const result = JSON.parse(content) as PerfumeProfile;
-          
+
           // Validar que el ID del perfume esté en la lista disponible
           if (!availablePerfumeIds.includes(result.recommendedPerfumeId)) {
             // Si la recomendación no es válida, usamos el primer perfume
             result.recommendedPerfumeId = availablePerfumeIds[0];
           }
-          
+
           return result;
         } else {
           throw new Error("Respuesta vacía de OpenAI");
@@ -147,7 +147,7 @@ export async function generatePerfumeProfile(
     } else {
       console.log("Cliente de OpenAI no disponible, intentando con Anthropic");
     }
-    
+
     // Si OpenAI falla o no está disponible, intentamos con Anthropic
     if (anthropic) {
       try {
@@ -190,14 +190,14 @@ export async function generatePerfumeProfile(
             jsonStr = content.substring(jsonStart, jsonEnd);
           }
         }
-        
+
         const result = JSON.parse(jsonStr) as PerfumeProfile;
-        
+
         // Validar que el ID del perfume esté en la lista disponible
         if (!availablePerfumeIds.includes(result.recommendedPerfumeId)) {
           result.recommendedPerfumeId = availablePerfumeIds[0];
         }
-        
+
         return result;
       } catch (anthropicError) {
         console.log("Error con Anthropic, usando respuestas predefinidas:", anthropicError);
@@ -205,15 +205,15 @@ export async function generatePerfumeProfile(
     } else {
       console.log("Cliente de Anthropic no disponible, usando respuestas predefinidas");
     }
-    
+
     // Si llegamos aquí, ambos servicios fallaron o no están disponibles
     throw new Error("Fallaron todos los servicios de IA o no están disponibles");
   } catch (error) {
     console.error("Error generando perfil de perfume:", error);
-    
+
     // Fallback a lógica simple para seleccionar un perfume basado en preferencias
     let recommendedPerfumeId = availablePerfumeIds[0]; // Default al primero
-    
+
     // Selección básica basada en edad y ocasión
     if (preferences.age.includes("joven") || parseInt(preferences.age) < 30) {
       recommendedPerfumeId = availablePerfumeIds[0];
@@ -222,21 +222,21 @@ export async function generatePerfumeProfile(
     } else if (preferences.preferences.includes("dulce") || preferences.preferences.includes("floral")) {
       recommendedPerfumeId = availablePerfumeIds.length > 2 ? availablePerfumeIds[2] : availablePerfumeIds[0];
     }
-    
+
     // Perfiles psicológicos predefinidos
     const profiles = {
       joven: "Eres una persona dinámica y espontánea que busca experiencias nuevas. Valoras la libertad y la autenticidad en tus relaciones. Tu personalidad vibrante atrae a los demás naturalmente.",
       adulto: "Tienes una personalidad equilibrada con un fuerte sentido de ti mismo. Valoras la calidad y la elegancia en todos los aspectos de tu vida. Tu presencia transmite confianza y sofisticación.",
       formal: "Eres metódico y organizado, con un enfoque estructurado en la vida. Valoras la puntualidad y la responsabilidad. Tu atención al detalle te distingue en entornos profesionales."
     };
-    
+
     // Razones de recomendación predefinidas
     const reasons = {
       joven: "Esta fragancia captura tu espíritu libre y dinámico con notas frescas y energizantes. Su composición moderna refleja tu personalidad contemporánea.",
       adulto: "Este perfume sofisticado complementa tu personalidad equilibrada con una mezcla armoniosa de notas. Su elegancia atemporal refuerza tu presencia distinguida.",
       formal: "La estructura clásica de esta fragancia se alinea con tu personalidad metódica. Sus notas equilibradas proyectan profesionalismo y confiabilidad."
     };
-    
+
     // Determinar qué perfil usar basado en edad y preferencias
     let profileType: 'joven' | 'adulto' | 'formal' = "adulto"; // predeterminado
     if (preferences.age.includes("joven") || parseInt(preferences.age) < 30) {
@@ -244,7 +244,7 @@ export async function generatePerfumeProfile(
     } else if (preferences.occasion.includes("formal") || preferences.occasion.includes("trabajo")) {
       profileType = "formal";
     }
-    
+
     return {
       psychologicalProfile: profiles[profileType],
       recommendedPerfumeId: recommendedPerfumeId,
@@ -259,28 +259,34 @@ export async function generateChatResponse(
   previousMessage?: string
 ): Promise<string> {
   console.log("Generando respuesta para paso:", step, "género:", gender);
-  
+
   try {
     // Primero intentamos usar OpenAI
     if (openai) {
       try {
         const prompt = `
         Eres un asistente virtual de una tienda de perfumes llamada AROMASENS. Estás manteniendo una conversación con un cliente para recomendarle el perfume perfecto.
-        
+
         El cliente está buscando fragancias ${gender === 'femenino' ? 'femeninas' : 'masculinas'}.
-        
+
         Estás actualmente en el paso ${step} de la conversación.
-        
+
         ${previousMessage ? `El último mensaje del cliente fue: "${previousMessage}"` : ''}
-        
+
         Basado en el paso actual, responde con un mensaje apropiado:
-        
+
         Paso 0: Preséntate y pregunta por la edad del cliente.
         Paso 1: Pregunta sobre su experiencia con perfumes y sus favoritos.
         Paso 2: Pregunta sobre las ocasiones para las que quiere el perfume.
         Paso 3: Pregunta sobre sus notas o tipos de fragancias preferidas.
         Paso 4: Agradece sus respuestas y hazle saber que le proporcionarás una recomendación.
-        
+
+        INSTRUCCIONES IMPORTANTES DE FORMATO:
+        1. Incluye emojis para resaltar puntos importantes en tu respuesta.
+        2. Formatea tu respuesta usando Markdown para que sea más atractiva visualmente.
+        3. Utiliza encabezados, listas o negritas cuando sea apropiado.
+        4. Mantén un tono conversacional, amigable y entusiasta.
+
         Tu respuesta debe ser conversacional, amistosa y en español. No uses pasos numerados en tu respuesta.
         `;
 
@@ -309,27 +315,32 @@ export async function generateChatResponse(
     } else {
       console.log("Cliente de OpenAI no disponible, intentando con Anthropic");
     }
-      
+
     // Si OpenAI falla o no está disponible, intentamos con Anthropic
     if (anthropic) {
       try {
         const prompt = `
         Eres un asistente virtual de una tienda de perfumes llamada AROMASENS. Estás manteniendo una conversación con un cliente para recomendarle el perfume perfecto.
-        
+
         El cliente está buscando fragancias ${gender === 'femenino' ? 'femeninas' : 'masculinas'}.
-        
+
         Estás actualmente en el paso ${step} de la conversación.
-        
+
         ${previousMessage ? `El último mensaje del cliente fue: "${previousMessage}"` : ''}
-        
+
         Basado en el paso actual, responde con un mensaje apropiado:
-        
+
         Paso 0: Preséntate y pregunta por la edad del cliente.
         Paso 1: Pregunta sobre su experiencia con perfumes y sus favoritos.
         Paso 2: Pregunta sobre las ocasiones para las que quiere el perfume.
         Paso 3: Pregunta sobre sus notas o tipos de fragancias preferidas.
-        Paso 4: Agradece sus respuestas y hazle saber que le proporcionarás una recomendación.
-        
+
+        INSTRUCCIONES IMPORTANTES DE FORMATO:
+        1. Incluye emojis para resaltar puntos importantes en tu respuesta.
+        2. Formatea tu respuesta usando Markdown para que sea más atractiva visualmente.
+        3. Utiliza encabezados, listas o negritas cuando sea apropiado.
+        4. Mantén un tono conversacional, amigable y entusiasta.
+
         Tu respuesta debe ser conversacional, amistosa y en español. No uses pasos numerados en tu respuesta.
         `;
 
@@ -354,12 +365,12 @@ export async function generateChatResponse(
     } else {
       console.log("Cliente de Anthropic no disponible, usando respuestas predefinidas");
     }
-    
+
     // Si llegamos aquí, ambos servicios fallaron o no están disponibles
     throw new Error("Fallaron todos los servicios de IA o no están disponibles");
   } catch (error) {
     console.error("Error generando respuesta de chat:", error);
-    
+
     // Fallback a respuestas predefinidas
     // Respuestas predefinidas para cada paso del chat
     const responses: {
@@ -381,9 +392,9 @@ export async function generateChatResponse(
         4: "¡Excelente! Con toda esta información, puedo recomendarte el perfume que mejor se adapte a tu personalidad y preferencias. Dame un momento mientras busco la opción perfecta para ti."
       }
     };
-    
+
     const genderType = gender === 'femenino' ? 'feminine' : 'masculine';
-    
+
     // Devolver respuesta según el paso
     if (step >= 0 && step <= 4) {
       return responses[genderType][step];
