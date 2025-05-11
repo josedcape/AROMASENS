@@ -12,9 +12,13 @@ import { getMessages } from "@/lib/aiService";
 export default function ChatInterface() {
   const [, setLocation] = useLocation();
   const { state, dispatch } = useChatContext();
+  const { settings } = useAISettings();
   const [userInput, setUserInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Obtener los mensajes según el idioma seleccionado
+  const messages = getMessages(settings.language);
   
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -230,14 +234,19 @@ export default function ChatInterface() {
         
         {/* Chat Input */}
         <div className="p-4 border-t border-border/50 bg-card/30">
-          <form onSubmit={handleSendMessage} className="flex items-center">
+          <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
+            <SpeechRecognitionButton 
+              onResult={(text) => setUserInput(text)}
+              className="hidden sm:flex"
+            />
+            
             <div className="relative flex-grow">
               <input
                 type="text"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 className="w-full bg-background/50 backdrop-blur-sm border border-border rounded-l-full py-3 px-5 pr-12 focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-all duration-300"
-                placeholder="Escribe tu respuesta..."
+                placeholder={messages.typeMessage}
                 disabled={state.isTyping || isProcessing}
               />
               <button
@@ -255,7 +264,7 @@ export default function ChatInterface() {
               }`}
               disabled={state.isTyping || isProcessing || !userInput.trim()}
             >
-              Enviar
+              {messages.sendMessage}
             </button>
           </form>
           
