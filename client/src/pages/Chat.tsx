@@ -1,8 +1,8 @@
+
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import ChatInterface from "@/components/ChatInterface";
 import { useChatContext } from "@/context/ChatContext";
-import BotidinamixLogo from "@/components/BotidinamixLogo";
 
 export default function Chat() {
   const [, setLocation] = useLocation();
@@ -37,7 +37,6 @@ export default function Chat() {
       <div className="relative z-10">
         <ChatInterface />
       </div>
-      <BotidinamixLogo position="bottom-left" size="medium" />
     </div>
   );
 }
