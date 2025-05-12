@@ -3,7 +3,8 @@ import { useLocation } from "wouter";
 import { useChatContext } from "@/context/ChatContext";
 import { ArrowRight } from "lucide-react";
 import logoImg from "@/assets/aromasens-logo.png";
-import womenVideo from "@/assets/women.mp4"; // Importación del video
+import womenVideo from "@/assets/women.mp4"; // Importación del video femenino
+import menVideo from "@/assets/aromasens.mp4"; // Importación del video masculino
 
 export default function GenderSelection() {
   const [, setLocation] = useLocation();
@@ -87,7 +88,7 @@ export default function GenderSelection() {
               playsInline
               className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
               style={{ objectFit: "cover", objectPosition: "center" }}
-              src={womenVideo} // Usando el video importado
+              src={womenVideo} // Usando el video femenino importado
             >
               Tu navegador no soporta videos HTML5.
             </video>
@@ -117,13 +118,17 @@ export default function GenderSelection() {
           onClick={() => handleSelectGender("masculino")}
         >
           <div className="relative h-64 md:h-80 overflow-hidden rounded-t-lg">
-            <div
-              className="absolute inset-0 bg-cover bg-center transform hover:scale-110 transition-transform duration-700"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1594035910387-fea47794261f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800')",
-              }}
-            />
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
+              style={{ objectFit: "cover", objectPosition: "center" }}
+              src={menVideo} // Usando el video masculino importado
+            >
+              Tu navegador no soporta videos HTML5.
+            </video>
             <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
           </div>
 
