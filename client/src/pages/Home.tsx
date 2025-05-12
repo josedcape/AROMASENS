@@ -1,4 +1,5 @@
 import GenderSelection from "@/components/GenderSelection";
+import BotidinamixLogo from "@/components/BotidinamixLogo";
 
 export default function Home() {
   return (
@@ -14,6 +15,9 @@ export default function Home() {
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent"></div>
         <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent"></div>
       </div>
+      
+      {/* Logo BOTIDINAMIX en la esquina */}
+      <BotidinamixLogo position="bottom-right" size="medium" />
       
       {/* Contenido principal */}
       <div className="relative z-10">
