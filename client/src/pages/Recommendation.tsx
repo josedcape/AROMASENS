@@ -1,4 +1,7 @@
+The code modification adds a button to the notification message that appears after the user's data is successfully sent, allowing them to navigate to a section with more recommended products.
+```
 
+```replit_final_file
 import { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { PerfumeRecommendation } from "@/lib/types";
@@ -102,18 +105,29 @@ export default function Recommendation() {
           <h2 className="font-serif text-4xl md:text-5xl text-gradient font-bold mb-2">
             TU PERFUME IDEAL
           </h2>
-          
+
           {/* Mensaje de notificación si viene desde webhook */}
-          {location.state?.dataSent && (
-            <div className="glass-effect py-2 px-4 rounded-full inline-flex items-center space-x-2 mb-4">
-              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <p className="text-foreground text-sm">
-                Información enviada correctamente. Gracias por tu participación.
-              </p>
-            </div>
-          )}
+                {location.state?.dataSent && (
+                  <div className="flex flex-col items-center space-y-3 mb-4">
+                    <div className="glass-effect py-2 px-4 rounded-full inline-flex items-center space-x-2">
+                      <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <p className="text-foreground text-sm">
+                        Información enviada correctamente. Gracias por tu participación.
+                      </p>
+                    </div>
+                    <button 
+                      className="btn-animated py-2 px-6 glass-effect border border-accent/20 text-accent rounded-full transition-all duration-300 flex items-center justify-center hover:bg-accent/10"
+                      onClick={() => window.location.href = "#recommended-products"}
+                    >
+                      <span>Ver más recomendaciones</span>
+                      <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                  </div>
+                )}
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
             <div className="glass-effect py-2 px-4 rounded-full inline-flex items-center space-x-2">
@@ -222,7 +236,7 @@ export default function Recommendation() {
             <div className="h-px bg-accent/30 flex-grow ml-4"></div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"  id="recommended-products">
             {/* Additional Perfume 1 */}
             <div className="futuristic-card overflow-hidden hover:shadow-accent/20 transition-all duration-500 transform hover:-translate-y-1 cursor-pointer">
               <div className="relative h-64 overflow-hidden">
