@@ -7,12 +7,13 @@ import { startChat, sendMessage, getRecommendation, sleep } from "@/lib/chatHelp
 import { Send, Bot, User, Sparkles } from "lucide-react";
 import logoImg from "@/assets/aromasens-logo.png";
 import SpeechRecognitionButton from "@/components/SpeechRecognitionButton";
+import TextToSpeechControls from "@/components/TextToSpeechControls";
 import { getMessages } from "@/lib/aiService";
 
 export default function ChatInterface() {
   const [, setLocation] = useLocation();
   const { state, dispatch } = useChatContext();
-  const { settings, setLanguage } = useAISettings();
+  const { settings, setLanguage, ttsSettings, speakText } = useAISettings();
   const [userInput, setUserInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -23,7 +24,23 @@ export default function ChatInterface() {
   // Scroll to bottom whenever messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [state.messages]);
+    
+    // Leer en voz alta el último mensaje del asistente si TTS está activado
+    if (ttsSettings.enabled && state.messages.length > 0) {
+      const lastMessage = state.messages[state.messages.length - 1];
+      if (lastMessage.role === 'assistant') {
+        // Limpiar el texto para TTS (eliminar markdown y otros símbolos)
+        const cleanText = lastMessage.content
+          .replace(/\*\*(.*?)\*\*/g, '$1') // Eliminar negrita
+          .replace(/\*(.*?)\*/g, '$1')     // Eliminar cursiva
+          .replace(/`(.*?)`/g, '$1')       // Eliminar formato de código
+          .replace(/- /g, ', ');           // Convertir viñetas en comas
+        
+        // Usar el servicio de TTS
+        speakText(cleanText);
+      }
+    }
+  }, [state.messages, ttsSettings.enabled, speakText]);
   
   // Initialize chat when component mounts
   useEffect(() => {
@@ -247,11 +264,16 @@ export default function ChatInterface() {
           </h3>
           <div className="h-px bg-accent/30 w-12"></div>
         </div>
-        <div className="glass-effect py-2 px-4 rounded-full inline-flex items-center space-x-2 mb-4">
-          <Sparkles className="w-4 h-4 text-accent" />
-          <p className="text-foreground text-sm">
-            {messages.idealPerfume}
-          </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+          <div className="glass-effect py-2 px-4 rounded-full inline-flex items-center space-x-2">
+            <Sparkles className="w-4 h-4 text-accent" />
+            <p className="text-foreground text-sm">
+              {messages.idealPerfume}
+            </p>
+          </div>
+          
+          {/* Controles de síntesis de voz */}
+          <TextToSpeechControls gender={state.selectedGender} />
         </div>
       </div>
       

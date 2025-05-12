@@ -1,46 +1,96 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { AIModel, AISettings, Language } from '@/lib/aiService';
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { AIModel, Language, AISettings } from "@/lib/aiService";
+import { TextToSpeechSettings, textToSpeech } from "@/lib/textToSpeechService";
 
-// Valor por defecto para el contexto
+interface AISettingsContextType {
+  settings: AISettings;
+  ttsSettings: TextToSpeechSettings;
+  setModel: (model: AIModel) => void;
+  setLanguage: (language: Language) => void;
+  setTTSEnabled: (enabled: boolean) => void;
+  setTTSGender: (gender: 'male' | 'female') => void;
+  setTTSLanguage: (language: Language) => void;
+  speakText: (text: string) => void;
+  stopSpeech: () => void;
+}
+
 const defaultSettings: AISettings = {
-  model: 'openai',
+  model: "openai",
+  language: "es",
+};
+
+const defaultTTSSettings: TextToSpeechSettings = {
+  enabled: false,
+  gender: 'female',
   language: 'es'
 };
 
-// Tipo para el contexto
-interface AISettingsContextType {
-  settings: AISettings;
-  setModel: (model: AIModel) => void;
-  setLanguage: (language: Language) => void;
-}
+const AISettingsContext = createContext<AISettingsContextType | undefined>(
+  undefined,
+);
 
-// Crear el contexto
-const AISettingsContext = createContext<AISettingsContextType | undefined>(undefined);
-
-// Proveedor del contexto
 export function AISettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<AISettings>(defaultSettings);
+  const [ttsSettings, setTTSSettings] = useState<TextToSpeechSettings>(defaultTTSSettings);
+
+  useEffect(() => {
+    // Sincronizar configuración de TTS con nuestro servicio
+    textToSpeech.updateSettings(ttsSettings);
+  }, [ttsSettings]);
 
   const setModel = (model: AIModel) => {
-    setSettings(prev => ({ ...prev, model }));
+    setSettings((prev) => ({ ...prev, model }));
   };
 
   const setLanguage = (language: Language) => {
-    setSettings(prev => ({ ...prev, language }));
+    setSettings((prev) => ({ ...prev, language }));
+    // Actualizar también el idioma de TTS
+    setTTSSettings((prev) => ({ ...prev, language }));
+  };
+
+  const setTTSEnabled = (enabled: boolean) => {
+    setTTSSettings((prev) => ({ ...prev, enabled }));
+  };
+
+  const setTTSGender = (gender: 'male' | 'female') => {
+    setTTSSettings((prev) => ({ ...prev, gender }));
+  };
+
+  const setTTSLanguage = (language: Language) => {
+    setTTSSettings((prev) => ({ ...prev, language }));
+  };
+
+  const speakText = (text: string) => {
+    textToSpeech.speak(text);
+  };
+
+  const stopSpeech = () => {
+    textToSpeech.stop();
   };
 
   return (
-    <AISettingsContext.Provider value={{ settings, setModel, setLanguage }}>
+    <AISettingsContext.Provider 
+      value={{ 
+        settings, 
+        ttsSettings,
+        setModel, 
+        setLanguage,
+        setTTSEnabled,
+        setTTSGender,
+        setTTSLanguage,
+        speakText,
+        stopSpeech
+      }}
+    >
       {children}
     </AISettingsContext.Provider>
   );
 }
 
-// Hook para usar el contexto
 export function useAISettings() {
   const context = useContext(AISettingsContext);
   if (context === undefined) {
-    throw new Error('useAISettings must be used within an AISettingsProvider');
+    throw new Error("useAISettings must be used within an AISettingsProvider");
   }
   return context;
 }
