@@ -298,11 +298,38 @@ export default function ChatInterface() {
                 <div
                   className={`${
                     message.role === "user"
-                      ? "bg-accent/10 border border-accent/20 text-foreground"
-                      : "glass-effect text-foreground"
-                  } rounded-2xl py-3 px-4 max-w-[85%] shadow-sm`}
+                      ? "bg-orange-200 border border-orange-300 text-black"
+                      : "glass-effect bg-orange-100 text-black border border-orange-200"
+                  } rounded-2xl py-3 px-4 max-w-[85%] shadow-md`}
                 >
-                  <p className="leading-relaxed">{message.content}</p>
+                  {message.role === "user" ? (
+                    <div className="mb-1 text-xs font-semibold text-orange-600 uppercase tracking-wide">Usuario</div>
+                  ) : (
+                    <div className="mb-1 text-xs font-semibold text-primary uppercase tracking-wide">Asistente</div>
+                  )}
+                  <div className="markdown-content leading-relaxed">
+                    {message.content.split('\n').map((paragraph, i) => {
+                      // Procesamiento básico de Markdown
+                      // Formato de negrita
+                      let formattedText = paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                      // Formato de cursiva
+                      formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                      // Formato de código
+                      formattedText = formattedText.replace(/`(.*?)`/g, '<code class="bg-orange-50 px-1 rounded text-orange-800">$1</code>');
+                      // Formato de listas
+                      if (formattedText.trim().startsWith('- ')) {
+                        formattedText = `<span class="flex"><span class="mr-2">•</span><span>${formattedText.substring(2)}</span></span>`;
+                      }
+                      
+                      return (
+                        <p 
+                          key={i} 
+                          className={`${i > 0 ? 'mt-2' : ''}`}
+                          dangerouslySetInnerHTML={{ __html: formattedText }}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
                 
                 {message.role === "user" && (
@@ -319,11 +346,12 @@ export default function ChatInterface() {
                 <div className="w-10 h-10 rounded-full bg-primary/10 backdrop-blur-sm flex items-center justify-center border border-primary/20 flex-shrink-0 mr-3">
                   <Bot className="w-5 h-5 text-primary" />
                 </div>
-                <div className="glass-effect rounded-2xl py-3 px-6">
+                <div className="glass-effect bg-orange-100 border border-orange-200 rounded-2xl py-3 px-6 shadow-md">
+                  <div className="mb-1 text-xs font-semibold text-primary uppercase tracking-wide">Asistente</div>
                   <div className="flex space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.3s" }}></div>
-                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.6s" }}></div>
+                    <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></div>
+                    <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" style={{ animationDelay: "0.3s" }}></div>
+                    <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" style={{ animationDelay: "0.6s" }}></div>
                   </div>
                 </div>
               </div>

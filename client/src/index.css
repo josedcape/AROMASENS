@@ -185,4 +185,40 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.8; }
   }
+  
+  /* Estilos para el contenido Markdown en burbujas de chat */
+  .markdown-content strong {
+    @apply font-bold text-orange-900;
+  }
+  
+  .markdown-content em {
+    @apply italic text-orange-800;
+  }
+  
+  .markdown-content code {
+    @apply font-mono text-sm rounded px-1 py-0.5 bg-orange-50 text-orange-800;
+  }
+  
+  .markdown-content h1, .markdown-content h2, .markdown-content h3, 
+  .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+    @apply font-bold text-orange-900 my-2;
+  }
+  
+  .markdown-content ul, .markdown-content ol {
+    @apply pl-5 my-2 space-y-1;
+  }
+  
+  .markdown-content a {
+    @apply text-primary underline hover:text-accent transition-colors;
+  }
+  
+  /* Estilos especiales para las burbujas de chat */
+  .chat-message .markdown-content {
+    @apply text-black transition-all;
+  }
+  
+  /* Efectos de hover para las burbujas */
+  .chat-message:hover .markdown-content {
+    @apply text-black/90;
+  }
 }
