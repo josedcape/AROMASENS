@@ -17,13 +17,27 @@ export default function ChatInterface() {
   const [userInput, setUserInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   
   // Obtener los mensajes según el idioma seleccionado
   const messages = getMessages(settings.language);
   
+  // Función para desplazarse manualmente al principio de la conversación
+  const scrollToTop = () => {
+    chatContainerRef.current?.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+  
   // Scroll to bottom whenever messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      // Aseguramos un scroll más fiable
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      }, 100);
+    }
     
     // Leer en voz alta el último mensaje del asistente si TTS está activado
     if (ttsSettings.enabled && state.messages.length > 0) {
@@ -301,14 +315,17 @@ export default function ChatInterface() {
         </div>
         
         {/* Chat Messages */}
-        <div className="chat-container overflow-y-auto flex-grow p-4 md:p-6">
-          <div className="flex flex-col space-y-4">
+        <div 
+          ref={chatContainerRef}
+          className="chat-container overflow-y-auto overflow-x-hidden flex-grow p-4 md:p-6 scrollbar-hide"
+        >
+          <div className="flex flex-col space-y-4 w-full">
             {state.messages.map((message, index) => (
               <div
                 key={index}
                 className={`chat-message flex items-start ${
                   message.role === "user" ? "justify-end" : ""
-                } animate-in fade-in-0 duration-300 ease-in-out`}
+                } animate-in fade-in-0 duration-300 ease-in-out w-full`}
                 style={{ animationDelay: `${index * 150}ms` }}
               >
                 {message.role === "assistant" && (
@@ -380,6 +397,19 @@ export default function ChatInterface() {
             )}
             <div ref={messagesEndRef} />
           </div>
+          
+          {/* Botón para subir cuando hay muchos mensajes */}
+          {state.messages.length > 5 && (
+            <button
+              onClick={scrollToTop}
+              className="absolute top-4 right-4 bg-accent/20 hover:bg-accent/40 text-accent rounded-full p-2 transition-all duration-300 shadow-md"
+              aria-label="Scroll to top"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 15l-6-6-6 6"/>
+              </svg>
+            </button>
+          )}
         </div>
         
         {/* Chat Input */}
