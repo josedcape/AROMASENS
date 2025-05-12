@@ -30,7 +30,7 @@ export default function TextToSpeechControls({ gender }: { gender?: string }) {
   }, [gender, setTTSGender, ttsSettings.gender]);
 
   // Si el navegador no soporta síntesis de voz, no mostrar el componente
-  if (!isSupported) return null;ll;
+  if (!isSupported) return null;
 
   return (
     <div className="text-to-speech-controls flex items-center space-x-3 bg-accent/10 backdrop-blur-sm rounded-full px-3 py-1.5">
