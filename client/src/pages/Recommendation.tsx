@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { PerfumeRecommendation } from "@/lib/types";
 import { useChatContext } from "@/context/ChatContext";
+import TextToSpeechControls from "@/components/TextToSpeechControls";
+import BotidinamixLogo from "@/components/BotidinamixLogo";
 import { Store, ArrowLeft, Sparkles, Droplets, Clock, Heart } from "lucide-react";
 import logoImg from "@/assets/aromasens-logo.png";
-import TextToSpeechControls from "@/components/TextToSpeechControls";
 import { useAISettings } from "@/context/AISettingsContext";
 import { getMessages } from "@/lib/aiService";
 
@@ -32,10 +33,10 @@ export default function Recommendation() {
       if (ttsSettings.enabled && recommendation) {
         // Extraer solo el texto importante para la voz
         const description = recommendation.description || '';
-  
+
         // Combinar y limpiar el texto para la síntesis de voz
         const textToRead = description.replace(/\*/g, '');
-  
+
         // Pequeño retraso para asegurar que la página se ha cargado
         setTimeout(() => {
           speakText(textToRead);
@@ -86,7 +87,7 @@ export default function Recommendation() {
 
       <div className="container mx-auto px-4 h-full relative z-10">
         {/* Header Section */}
-        
+
         <div className="text-center mb-10">
           <div className="flex justify-center mb-6">
             <div className="logo-container w-16 h-16 overflow-hidden animate-float">

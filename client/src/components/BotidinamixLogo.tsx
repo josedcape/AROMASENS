@@ -30,6 +30,7 @@ export default function BotidinamixLogo({
   return (
     <div 
       className={`fixed ${positionClasses[position]} z-50 ${sizeClasses[size]} rounded-full overflow-hidden border-2 border-[#00a2ff] shadow-lg shadow-[#00a2ff]/20 hover:scale-110 transition-transform duration-300 ${className}`}
+      style={{ boxShadow: '0 0 15px 2px rgba(0, 162, 255, 0.4)' }}
     >
       <img 
         src={botidinamixLogo} 
