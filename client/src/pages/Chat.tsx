@@ -15,9 +15,9 @@ export default function Chat() {
   }, [state.selectedGender, setLocation]);
 
   return (
-    <div className="flex-grow animated-bg min-h-screen pt-20 pb-10 overflow-x-hidden">
+    <div className="flex-grow animated-bg min-h-screen pt-16 pb-6 overflow-x-hidden">
       {/* Elementos decorativos de fondo */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none opacity-70">
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none opacity-50">
         {/* Efectos de luz y ambiente */}
         <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-b from-accent/10 to-transparent rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-t from-primary/10 to-transparent rounded-full blur-3xl"></div>

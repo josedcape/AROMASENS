@@ -24,13 +24,13 @@ export default function TextToSpeechControls({ gender }: { gender?: string }) {
 
   // Establecer el género de la voz basado en el chat seleccionado
   useEffect(() => {
-    if (gender) {
+    if (gender && ttsSettings.gender !== (gender === 'femenino' ? 'female' : 'male')) {
       setTTSGender(gender === 'femenino' ? 'female' : 'male');
     }
-  }, [gender, setTTSGender]);
+  }, [gender, setTTSGender, ttsSettings.gender]);
 
   // Si el navegador no soporta síntesis de voz, no mostrar el componente
-  if (!isSupported) return null;
+  if (!isSupported) return null;ll;
 
   return (
     <div className="text-to-speech-controls flex items-center space-x-3 bg-accent/10 backdrop-blur-sm rounded-full px-3 py-1.5">

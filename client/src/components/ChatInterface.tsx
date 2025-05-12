@@ -413,7 +413,7 @@ export default function ChatInterface() {
         </div>
         
         {/* Chat Input */}
-        <div className="p-4 border-t border-border/50 bg-card/30">
+        <div className="p-4 border-t border-border/50 bg-card/30 sticky bottom-0 z-20">
           <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
             <SpeechRecognitionButton 
               onResult={(text) => setUserInput(text)}
@@ -426,12 +426,17 @@ export default function ChatInterface() {
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 onFocus={() => {
-                  // Asegurar que la vista se mantenga en el área de entrada cuando se enfoca
-                  setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 100);
+                  // Mejor manejo del enfoque y scroll
+                  setTimeout(() => {
+                    if (messagesEndRef.current) {
+                      messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+                    }
+                  }, 100);
                 }}
                 className="w-full bg-background/50 backdrop-blur-sm border border-border rounded-l-full py-3 px-5 pr-12 focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-all duration-300"
                 placeholder={messages.typeMessage}
                 disabled={state.isTyping || isProcessing}
+                style={{ fontSize: '16px' }} /* Evitar zoom en iOS */
               />
               <button
                 type="submit"
@@ -454,13 +459,13 @@ export default function ChatInterface() {
           
           {/* Quick Responses */}
           {state.quickResponses && state.quickResponses.length > 0 && !state.isTyping && (
-            <div className="flex flex-wrap gap-2 mt-4">
+            <div className="flex flex-wrap gap-2 mt-4 mb-2 pb-2">
               {state.quickResponses.map((response, index) => (
                 <button
                   key={index}
                   onClick={() => handleQuickResponse(response)}
                   className="py-2 px-4 bg-accent/10 backdrop-blur-sm hover:bg-accent/20 text-accent rounded-full text-sm transition-all duration-300 border border-accent/20 hover-glow"
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  style={{ animationDelay: `${index * 100}ms`, fontSize: '14px' }}
                 >
                   {response}
                 </button>
