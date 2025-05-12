@@ -1,16 +1,16 @@
-The code modification adds a button to the notification message that appears after the user's data is successfully sent, allowing them to navigate to a section with more recommended products.
-```
 
-```replit_final_file
 import { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { PerfumeRecommendation } from "@/lib/types";
 import { useChatContext } from "@/context/ChatContext";
 import TextToSpeechControls from "@/components/TextToSpeechControls";
-import { Store, ArrowLeft, Sparkles, Droplets, Clock, Heart } from "lucide-react";
+import { Store, ArrowLeft, Sparkles, Droplets, Clock, Heart, ChevronRight, ChevronLeft } from "lucide-react";
 import logoImg from "@/assets/aromasens-logo.png";
 import { useAISettings } from "@/context/AISettingsContext";
 import { getMessages } from "@/lib/aiService";
+import VirtualAssistant from "@/components/VirtualAssistant";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { motion } from "framer-motion";
 
 export default function Recommendation() {
   const [, setLocation] = useLocation();
@@ -19,6 +19,57 @@ export default function Recommendation() {
   const { settings, ttsSettings, speakText } = useAISettings();
   const messages = getMessages(settings.language);
   const [recommendation, setRecommendation] = useState<PerfumeRecommendation | null>(null);
+  const [showMainImage, setShowMainImage] = useState(true);
+
+  // Carrusel de productos adicionales
+  const additionalProducts = [
+    {
+      id: "essence-royal",
+      name: "Essence Royal",
+      brand: "AROMASENS",
+      imageUrl: "https://i.ibb.co/NYDvMqZ/file-0000000003c461f8951efb39076dbc3e.png",
+      description: "Una sofisticada composición que fusiona elegancia y modernidad con notas de bergamota italiana.",
+      notes: ["Bergamota italiana", "Jazmín", "Ámbar"],
+      occasions: "Eventos formales, cenas elegantes"
+    },
+    {
+      id: "amber-elixir",
+      name: "Amber Elixir",
+      brand: "AROMASENS",
+      imageUrl: "https://i.ibb.co/vvB20P3/file-0000000026546230aa854a8e50a62cbb.png",
+      description: "Una fragancia cálida y envolvente con toques orientales y una base de ámbar y vainilla.",
+      notes: ["Ámbar", "Vainilla", "Rosa"],
+      occasions: "Noches románticas, eventos sociales"
+    },
+    {
+      id: "aqua-vitale",
+      name: "Aqua Vitale",
+      brand: "AROMASENS",
+      imageUrl: "https://i.ibb.co/vQgvJZV/file-000000006a9061fd892e020436c2b59a.png",
+      description: "Frescura marina con un toque cítrico que evoca las brisas mediterráneas y sensación de libertad.",
+      notes: ["Limón de Amalfi", "Menta", "Algas marinas"],
+      occasions: "Uso diario, actividades al aire libre"
+    },
+    // Espacio para más productos
+    {
+      id: "midnight-orchid",
+      name: "Midnight Orchid",
+      brand: "AROMASENS",
+      imageUrl: "https://images.unsplash.com/photo-1605804931335-34ac138adfe9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80",
+      description: "Una fragancia misteriosa y seductora con notas de orquídea negra y vainilla bourbon.",
+      notes: ["Orquídea negra", "Vainilla bourbon", "Sándalo"],
+      occasions: "Ocasiones nocturnas, eventos especiales"
+    },
+    {
+      id: "citrus-bloom",
+      name: "Citrus Bloom",
+      brand: "AROMASENS",
+      imageUrl: "https://images.unsplash.com/photo-1605126300886-3300a57a69e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80",
+      description: "Un aroma fresco y revitalizante con cítricos mediterráneos y flores blancas.",
+      notes: ["Naranja", "Mandarina", "Neroli"],
+      occasions: "Uso diario, primavera, verano"
+    }
+  ];
 
   // Get recommendation from location state or redirect to home
   useEffect(() => {
@@ -31,23 +82,23 @@ export default function Recommendation() {
     }
   }, [location, chatState.selectedGender, setLocation]);
 
-    // Leer la recomendación al cargar la página
-    useEffect(() => {
-      if (ttsSettings.enabled && recommendation) {
-        // Extraer solo el texto importante para la voz
-        const description = recommendation.description || '';
+  // Leer la recomendación al cargar la página
+  useEffect(() => {
+    if (ttsSettings.enabled && recommendation) {
+      // Extraer solo el texto importante para la voz
+      const description = recommendation.description || '';
 
-        // Combinar y limpiar el texto para la síntesis de voz
-        const textToRead = description.replace(/\*/g, '');
+      // Combinar y limpiar el texto para la síntesis de voz
+      const textToRead = description.replace(/\*/g, '');
 
-        // Pequeño retraso para asegurar que la página se ha cargado
-        setTimeout(() => {
-          speakText(textToRead);
-        }, 500);
-      }
-    }, [recommendation, ttsSettings.enabled, speakText]);
+      // Pequeño retraso para asegurar que la página se ha cargado
+      setTimeout(() => {
+        speakText(textToRead);
+      }, 500);
+    }
+  }, [recommendation, ttsSettings.enabled, speakText]);
 
-  // If no recommendation, show loading
+  // Si no hay recomendación, mostrar carga
   if (!recommendation) {
     return (
       <div className="flex-grow animated-bg min-h-screen pt-20 pb-10 flex items-center justify-center">
@@ -71,7 +122,7 @@ export default function Recommendation() {
   }
 
   return (
-    <div className="flex-grow animated-bg min-h-screen pt-20 pb-10">
+    <div className="flex-grow animated-bg min-h-screen pt-20 pb-20">
       {/* Elementos decorativos de fondo */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none opacity-70">
         {/* Efectos de luz y ambiente */}
@@ -90,9 +141,13 @@ export default function Recommendation() {
 
       <div className="container mx-auto px-4 h-full relative z-10">
         {/* Header Section */}
-
         <div className="text-center mb-10">
-          <div className="flex justify-center mb-6">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex justify-center mb-6"
+          >
             <div className="logo-container w-16 h-16 overflow-hidden animate-float">
               <img 
                 src={logoImg} 
@@ -100,36 +155,51 @@ export default function Recommendation() {
                 className="w-full h-full object-cover"
               />
             </div>
-          </div>
+          </motion.div>
 
-          <h2 className="font-serif text-4xl md:text-5xl text-gradient font-bold mb-2">
+          <motion.h2 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="font-serif text-4xl md:text-5xl text-gradient font-bold mb-2"
+          >
             TU PERFUME IDEAL
-          </h2>
+          </motion.h2>
 
           {/* Mensaje de notificación si viene desde webhook */}
-                {location.state?.dataSent && (
-                  <div className="flex flex-col items-center space-y-3 mb-4">
-                    <div className="glass-effect py-2 px-4 rounded-full inline-flex items-center space-x-2">
-                      <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <p className="text-foreground text-sm">
-                        Información enviada correctamente. Gracias por tu participación.
-                      </p>
-                    </div>
-                    <button 
-                      className="btn-animated py-2 px-6 glass-effect border border-accent/20 text-accent rounded-full transition-all duration-300 flex items-center justify-center hover:bg-accent/10"
-                      onClick={() => window.location.href = "#recommended-products"}
-                    >
-                      <span>Ver más recomendaciones</span>
-                      <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </button>
-                  </div>
-                )}
+          {location.state?.dataSent && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              className="flex flex-col items-center space-y-3 mb-4"
+            >
+              <div className="glass-effect py-2 px-4 rounded-full inline-flex items-center space-x-2">
+                <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <p className="text-foreground text-sm">
+                  Información enviada correctamente. Gracias por tu participación.
+                </p>
+              </div>
+              <button 
+                className="btn-animated py-2 px-6 glass-effect border border-accent/20 text-accent rounded-full transition-all duration-300 flex items-center justify-center hover:bg-accent/10"
+                onClick={() => window.location.href = "#recommended-products"}
+              >
+                <span>Ver más recomendaciones</span>
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+            </motion.div>
+          )}
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4"
+          >
             <div className="glass-effect py-2 px-4 rounded-full inline-flex items-center space-x-2">
               <Sparkles className="w-4 h-4 text-accent" />
               <p className="text-foreground text-sm">
@@ -139,68 +209,132 @@ export default function Recommendation() {
 
             {/* Controles de síntesis de voz */}
             <TextToSpeechControls gender={chatState.selectedGender} />
-          </div>
+          </motion.div>
         </div>
 
         {/* Main Recommendation Card */}
-        <div className="max-w-5xl mx-auto">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-5xl mx-auto"
+        >
           <div className="futuristic-card fancy-border overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
               {/* Perfume Image Section */}
               <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-accent/10 animate-gradient-bg"></div>
                 <div className="h-full flex items-center justify-center p-8 md:p-12 relative z-10">
-                  <div className="relative p-2 rounded-xl bg-gradient-to-tr from-primary/30 to-accent/30 hover-glow transition-all duration-500 backdrop-blur-sm">
-                    <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-primary/20 animate-pulse-subtle opacity-50 rounded-xl"></div>
-                    <img 
-                      src={recommendation.imageUrl} 
-                      alt={recommendation.name} 
-                      className="w-full h-auto rounded-lg z-10 relative"
-                    />
-                    <div className="absolute -top-6 -right-6 w-12 h-12 rounded-full bg-card flex items-center justify-center border border-accent/50 backdrop-blur-md shadow-lg animate-float" style={{ animationDelay: '0.3s' }}>
-                      <Heart className="w-6 h-6 text-accent" />
-                    </div>
-                  </div>
+                  {showMainImage ? (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5 }}
+                      className="relative p-2 rounded-xl bg-gradient-to-tr from-primary/30 to-accent/30 hover-glow transition-all duration-500 backdrop-blur-sm"
+                      onClick={() => setShowMainImage(false)}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-primary/20 animate-pulse-subtle opacity-50 rounded-xl"></div>
+                      <img 
+                        src={recommendation.imageUrl} 
+                        alt={recommendation.name} 
+                        className="w-full h-auto rounded-lg z-10 relative hover:scale-105 transition-transform duration-500 cursor-pointer"
+                      />
+                      <div className="absolute -top-6 -right-6 w-12 h-12 rounded-full bg-card flex items-center justify-center border border-accent/50 backdrop-blur-md shadow-lg animate-float" style={{ animationDelay: '0.3s' }}>
+                        <Heart className="w-6 h-6 text-accent" />
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      initial={{ opacity: 0, rotateY: 90 }}
+                      animate={{ opacity: 1, rotateY: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="p-2 rounded-xl bg-gradient-to-tr from-primary/30 to-accent/30 hover-glow transition-all duration-500 backdrop-blur-sm h-full w-full flex items-center justify-center"
+                      onClick={() => setShowMainImage(true)}
+                    >
+                      <div className="relative w-full h-full">
+                        <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-primary/20 animate-pulse-subtle opacity-50 rounded-xl"></div>
+                        <div className="z-10 relative rounded-lg h-full flex items-center justify-center p-4">
+                          <div className="glass-effect p-6 rounded-xl text-center">
+                            <h3 className="font-serif text-2xl text-accent mb-4">Información del producto</h3>
+                            <p className="text-sm mb-3"><span className="font-bold">Tipo:</span> Eau de Parfum</p>
+                            <p className="text-sm mb-3"><span className="font-bold">Duración:</span> 8-10 horas</p>
+                            <p className="text-sm mb-3"><span className="font-bold">Intensidad:</span> Media-Alta</p>
+                            <p className="text-sm mb-3"><span className="font-bold">Familia olfativa:</span> {recommendation.notes?.[0]}</p>
+                            <button className="mt-2 text-xs text-accent hover:underline">
+                              Volver a la imagen
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               </div>
 
               {/* Perfume Details Section */}
               <div className="p-8 md:p-12 flex flex-col h-full">
-                <div className="flex items-center mb-4">
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                  className="flex items-center mb-4"
+                >
                   <div className="glass-effect py-1 px-4 rounded-full text-xs uppercase tracking-wider text-accent font-medium border border-accent/20">
                     {recommendation.brand}
                   </div>
-                </div>
+                </motion.div>
 
-                <h2 className="font-serif text-3xl md:text-4xl font-bold text-gradient mb-4 leading-tight">
+                <motion.h2 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: 0.3 }}
+                  className="font-serif text-3xl md:text-4xl font-bold text-gradient mb-4 leading-tight"
+                >
                   {recommendation.name}
-                </h2>
+                </motion.h2>
 
-                <p className="text-foreground leading-relaxed mb-6 flex-grow">
+                <motion.p 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: 0.4 }}
+                  className="text-foreground leading-relaxed mb-6 flex-grow"
+                >
                   {recommendation.description}
-                </p>
+                </motion.p>
 
                 {/* Perfume Notes */}
-                <div className="mb-6">
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: 0.5 }}
+                  className="mb-6"
+                >
                   <div className="flex items-center mb-3">
                     <Droplets className="w-4 h-4 text-accent mr-2" />
                     <h3 className="font-serif text-xl text-primary">Notas</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {recommendation.notes?.map((note, index) => (
-                      <span 
+                      <motion.span 
                         key={index} 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.5 + (index * 0.1) }}
                         className="px-4 py-1.5 bg-accent/10 text-accent rounded-full text-sm border border-accent/20 hover-glow transition-all duration-300" 
-                        style={{ animationDelay: `${index * 100}ms` }}
                       >
                         {note}
-                      </span>
+                      </motion.span>
                     ))}
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Occasions */}
-                <div className="mb-8">
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: 0.6 }}
+                  className="mb-8"
+                >
                   <div className="flex items-center mb-3">
                     <Clock className="w-4 h-4 text-accent mr-2" />
                     <h3 className="font-serif text-xl text-primary">Ideal para</h3>
@@ -208,10 +342,15 @@ export default function Recommendation() {
                   <p className="text-foreground leading-relaxed">
                     {recommendation.occasions}
                   </p>
-                </div>
+                </motion.div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.7 }}
+                  className="flex flex-col sm:flex-row gap-4"
+                >
                   <button className="btn-animated py-3 px-6 bg-gradient-to-r from-primary to-accent text-white rounded-full shadow-lg hover:shadow-accent/20 transition-all duration-300 flex items-center justify-center">
                     <Store className="w-5 h-5 mr-2" />
                     <span>Ver en tienda</span>
@@ -223,103 +362,108 @@ export default function Recommendation() {
                       <span>Volver al inicio</span>
                     </button>
                   </Link>
-                </div>
+                </motion.div>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Additional Recommendations */}
-        <div className="max-w-5xl mx-auto mt-16">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="font-serif text-2xl text-primary">También te pueden gustar</h3>
-            <div className="h-px bg-accent/30 flex-grow ml-4"></div>
+        {/* Carrusel de Recomendaciones */}
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.3 }}
+          className="max-w-5xl mx-auto mt-20"
+          id="recommended-products"
+        >
+          <div className="mb-10 text-center">
+            <h3 className="font-serif text-3xl text-gradient mb-2">Descubre Más Fragancias</h3>
+            <p className="text-foreground/80 max-w-2xl mx-auto">
+              Explora nuestra colección exclusiva de perfumes diseñados para despertar emociones y crear recuerdos inolvidables.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"  id="recommended-products">
-            {/* Additional Perfume 1 */}
-            <div className="futuristic-card overflow-hidden hover:shadow-accent/20 transition-all duration-500 transform hover:-translate-y-1 cursor-pointer">
-              <div className="relative h-64 overflow-hidden">
-                <div 
-                  className="absolute inset-0 bg-cover bg-center transform hover:scale-110 transition-transform duration-700" 
-                  style={{backgroundImage: "url('https://pixabay.com/get/g61d4c27ac8f6d782356cdf37ec0fd86b415b43d3c7d4c86229a92a653550f1b248810cae8ae58bde543c1865bfe0dda6a2713ac8d8736c71d100e9a975510ee0_1280.jpg')"}}
-                ></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {additionalProducts.map((product, index) => (
+                <CarouselItem key={product.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.1 * index }}
+                    className="h-full"
+                  >
+                    <div className="futuristic-card h-full overflow-hidden hover:shadow-accent/20 transition-all duration-500 transform hover:-translate-y-2 cursor-pointer">
+                      <div className="relative h-64 overflow-hidden">
+                        <div 
+                          className="absolute inset-0 bg-cover bg-center transform hover:scale-110 transition-transform duration-700"
+                          style={{backgroundImage: `url('${product.imageUrl}')`}}
+                        ></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
 
-                <div className="absolute top-4 left-4 glass-effect py-1 px-3 rounded-full text-xs uppercase tracking-wider text-accent font-medium border border-accent/20">
-                  Lumine
-                </div>
-              </div>
+                        <div className="absolute top-4 left-4 glass-effect py-1 px-3 rounded-full text-xs uppercase tracking-wider text-accent font-medium border border-accent/20">
+                          {product.brand}
+                        </div>
+                      </div>
 
-              <div className="p-6">
-                <h4 className="font-serif text-xl font-bold mb-2">Velvet Dream</h4>
-                <p className="text-foreground text-sm mb-4">Fragancia dulce con notas florales y toques de vainilla para una experiencia suave y memorable.</p>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-1">
-                    <Droplets className="w-3 h-3 text-accent" />
-                    <span className="text-xs text-foreground/70">Vainilla, Flores blancas</span>
-                  </div>
-                  <div className="text-accent">→</div>
-                </div>
-              </div>
+                      <div className="p-6">
+                        <h4 className="font-serif text-xl font-bold mb-2">{product.name}</h4>
+                        <p className="text-foreground text-sm mb-4 line-clamp-2">{product.description}</p>
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center space-x-1">
+                            <Droplets className="w-3 h-3 text-accent" />
+                            <span className="text-xs text-foreground/70">{product.notes.slice(0, 2).join(", ")}</span>
+                          </div>
+                          <div className="text-accent">
+                            <ChevronRight className="w-4 h-4" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="flex items-center justify-center mt-4">
+              <CarouselPrevious className="relative inset-0 mx-1 translate-y-0 bg-card/80 hover:bg-accent/20 border-accent/20" />
+              <CarouselNext className="relative inset-0 mx-1 translate-y-0 bg-card/80 hover:bg-accent/20 border-accent/20" />
             </div>
+          </Carousel>
+        </motion.div>
 
-            {/* Additional Perfume 2 */}
-            <div className="futuristic-card overflow-hidden hover:shadow-accent/20 transition-all duration-500 transform hover:-translate-y-1 cursor-pointer">
-              <div className="relative h-64 overflow-hidden">
-                <div 
-                  className="absolute inset-0 bg-cover bg-center transform hover:scale-110 transition-transform duration-700" 
-                  style={{backgroundImage: "url('https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400')"}}
-                ></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
-
-                <div className="absolute top-4 left-4 glass-effect py-1 px-3 rounded-full text-xs uppercase tracking-wider text-accent font-medium border border-accent/20">
-                  Noir Collection
-                </div>
-              </div>
-
-              <div className="p-6">
-                <h4 className="font-serif text-xl font-bold mb-2">Midnight Essence</h4>
-                <p className="text-foreground text-sm mb-4">Aroma intenso con notas amaderadas y especiadas para personalidades misteriosas y atrayentes.</p>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-1">
-                    <Droplets className="w-3 h-3 text-accent" />
-                    <span className="text-xs text-foreground/70">Cardamomo, Oud, Sándalo</span>
-                  </div>
-                  <div className="text-accent">→</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Perfume 3 */}
-            <div className="futuristic-card overflow-hidden hover:shadow-accent/20 transition-all duration-500 transform hover:-translate-y-1 cursor-pointer">
-              <div className="relative h-64 overflow-hidden">
-                <div 
-                  className="absolute inset-0 bg-cover bg-center transform hover:scale-110 transition-transform duration-700" 
-                  style={{backgroundImage: "url('https://images.unsplash.com/photo-1617897903246-719242758050?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400')"}}
-                ></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent"></div>
-
-                <div className="absolute top-4 left-4 glass-effect py-1 px-3 rounded-full text-xs uppercase tracking-wider text-accent font-medium border border-accent/20">
-                  Floralie
-                </div>
-              </div>
-
-              <div className="p-6">
-                <h4 className="font-serif text-xl font-bold mb-2">Spring Bouquet</h4>
-                <p className="text-foreground text-sm mb-4">Fragancia fresca con notas cítricas y florales ligeras para espíritus libres y naturales.</p>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-1">
-                    <Droplets className="w-3 h-3 text-accent" />
-                    <span className="text-xs text-foreground/70">Bergamota, Azahar, Lirio</span>
-                  </div>
-                  <div className="text-accent">→</div>
-                </div>
-              </div>
-            </div>
+        {/* Call to Action Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="max-w-4xl mx-auto mt-20 mb-10 text-center"
+        >
+          <div className="glass-effect rounded-2xl p-8 backdrop-blur-md fancy-border overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-b from-accent/10 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-t from-primary/10 to-transparent rounded-full blur-3xl"></div>
+            
+            <h3 className="font-serif text-3xl text-gradient mb-4">Experiencia Olfativa Personalizada</h3>
+            <p className="text-foreground mb-6 max-w-xl mx-auto">
+              Descubre el poder de las fragancias para expresar tu personalidad única. Nuestros expertos perfumistas han creado cada aroma con atención meticulosa a los detalles.
+            </p>
+            <Link href="/chat">
+              <button className="btn-animated py-3 px-8 bg-gradient-to-r from-primary to-accent text-white rounded-full shadow-lg hover:shadow-accent/20 transition-all duration-300 inline-flex items-center justify-center">
+                <Sparkles className="w-5 h-5 mr-2" />
+                <span>Encuentra tu fragancia ideal</span>
+              </button>
+            </Link>
           </div>
-        </div>
+        </motion.div>
       </div>
+
+      {/* Virtual Assistant Component */}
+      <VirtualAssistant />
     </div>
   );
 }
