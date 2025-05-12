@@ -102,6 +102,18 @@ export default function Recommendation() {
           <h2 className="font-serif text-4xl md:text-5xl text-gradient font-bold mb-2">
             TU PERFUME IDEAL
           </h2>
+          
+          {/* Mensaje de notificación si viene desde webhook */}
+          {location.state?.dataSent && (
+            <div className="glass-effect py-2 px-4 rounded-full inline-flex items-center space-x-2 mb-4">
+              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <p className="text-foreground text-sm">
+                Información enviada correctamente. Gracias por tu participación.
+              </p>
+            </div>
+          )}
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
             <div className="glass-effect py-2 px-4 rounded-full inline-flex items-center space-x-2">

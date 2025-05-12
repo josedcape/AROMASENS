@@ -14,14 +14,17 @@ export default function ChatInterface() {
   const [, setLocation] = useLocation();
   const { state, dispatch } = useChatContext();
   const { settings, setLanguage, ttsSettings, speakText } = useAISettings();
-  const [userInput, setUserInput] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [userInput, setUserInput] = useState<string>("");
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [showWebhookButton, setShowWebhookButton] = useState<boolean>(false);
+  const [isSendingData, setIsSendingData] = useState<boolean>(false);
+  const [dataSent, setDataSent] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // Obtener los mensajes según el idioma seleccionado
   const messages = getMessages(settings.language);
-  
+
   // Función para desplazarse manualmente al principio de la conversación
   const scrollToTop = () => {
     chatContainerRef.current?.scrollTo({
@@ -29,7 +32,7 @@ export default function ChatInterface() {
       behavior: 'smooth'
     });
   };
-  
+
   // Scroll to bottom whenever messages change or when el input recibe focus
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -38,7 +41,7 @@ export default function ChatInterface() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
       });
     }
-    
+
     // Leer en voz alta el último mensaje del asistente si TTS está activado
     if (ttsSettings.enabled && state.messages.length > 0) {
       const lastMessage = state.messages[state.messages.length - 1];
@@ -49,20 +52,20 @@ export default function ChatInterface() {
           .replace(/\*(.*?)\*/g, '$1')     // Eliminar cursiva
           .replace(/`(.*?)`/g, '$1')       // Eliminar formato de código
           .replace(/- /g, ', ');           // Convertir viñetas en comas
-        
+
         // Usar el servicio de TTS
         speakText(cleanText);
       }
     }
   }, [state.messages, ttsSettings.enabled, speakText]);
-  
+
   // Initialize chat when component mounts
   useEffect(() => {
     const initializeChat = async () => {
       if (state.selectedGender && state.messages.length === 0) {
         try {
           dispatch({ type: "SET_TYPING", payload: true });
-          
+
           // Si no se ha seleccionado idioma, mostrar mensaje de selección de idioma
           if (!state.selectedLanguage) {
             await sleep(500);
@@ -73,60 +76,60 @@ export default function ChatInterface() {
                 content: "👋 ¡Hola! Hello! ¿En qué idioma prefieres comunicarte? / In which language would you prefer to communicate?" 
               },
             });
-            
+
             // Ofrecer opciones rápidas para seleccionar idioma
             dispatch({ 
               type: "SET_QUICK_RESPONSES", 
               payload: ["Español", "English"] 
             });
-            
+
             dispatch({ type: "SET_TYPING", payload: false });
             return;
           }
-          
+
           // Si ya se seleccionó el idioma, iniciar el chat normal
           const response = await startChat(state.selectedGender, settings.model, state.selectedLanguage);
-          
+
           await sleep(1000); // Simulate typing delay
-          
+
           dispatch({
             type: "ADD_MESSAGE",
             payload: { role: "assistant", content: response.message },
           });
-          
+
           if (response.quickResponses) {
             dispatch({ type: "SET_QUICK_RESPONSES", payload: response.quickResponses });
           }
-          
+
           dispatch({ type: "SET_TYPING", payload: false });
         } catch (error) {
           console.error("Failed to initialize chat:", error);
         }
       }
     };
-    
+
     initializeChat();
   }, [state.selectedGender, state.messages.length, state.selectedLanguage, dispatch, settings.model]);
-  
+
   const handleSendMessage = async (e?: FormEvent) => {
     if (e) e.preventDefault();
-    
+
     if (userInput.trim() === "" || isProcessing) return;
-    
+
     try {
       setIsProcessing(true);
-      
+
       // Add user message to chat
       dispatch({
         type: "ADD_MESSAGE",
         payload: { role: "user", content: userInput },
       });
-      
+
       // Detectar si es selección de idioma (solo si aún no hay idioma seleccionado)
       if (!state.selectedLanguage && state.messages.length === 1) {
         const userInputLower = userInput.toLowerCase().trim();
         let detectedLanguage: 'es' | 'en' = 'es'; // Default to Spanish
-        
+
         // Detectar idioma basado en la respuesta
         if (userInputLower === 'english' || 
             userInputLower === 'en' || 
@@ -135,49 +138,49 @@ export default function ChatInterface() {
             userInputLower.includes('english')) {
           detectedLanguage = 'en';
         }
-        
+
         // Establecer el idioma seleccionado
         dispatch({ type: "SET_LANGUAGE", payload: detectedLanguage });
-        
+
         // Actualizar los ajustes de IA con el nuevo idioma
         setLanguage(detectedLanguage);
-        
+
         // Clear input and set typing indicator
         setUserInput("");
         dispatch({ type: "SET_TYPING", payload: true });
-        
+
         // Responder acorde al idioma seleccionado
         await sleep(1000);
-        
+
         const welcomeMessage = detectedLanguage === 'en' 
           ? "Thank you! I'll communicate with you in English from now on. Let's continue with your perfume selection."
           : "¡Gracias! Me comunicaré contigo en español a partir de ahora. Continuemos con tu selección de perfume.";
-        
+
         dispatch({
           type: "ADD_MESSAGE",
           payload: { role: "assistant", content: welcomeMessage },
         });
-        
+
         // Iniciar el chat normal después de la selección de idioma
         await sleep(500);
         const response = await startChat(state.selectedGender, settings.model, detectedLanguage);
-        
+
         await sleep(1000);
-        
+
         dispatch({
           type: "ADD_MESSAGE",
           payload: { role: "assistant", content: response.message },
         });
-        
+
         if (response.quickResponses) {
           dispatch({ type: "SET_QUICK_RESPONSES", payload: response.quickResponses });
         }
-        
+
         dispatch({ type: "SET_TYPING", payload: false });
         setIsProcessing(false);
         return;
       }
-      
+
       // Proceso normal para mensajes después de selección de idioma
       // Store user response based on current step
       const responseKey = Object.keys(state.userResponses)[state.currentStep + 1]; // +1 because gender is already set
@@ -185,13 +188,13 @@ export default function ChatInterface() {
         type: "SET_USER_RESPONSE",
         payload: { key: responseKey, value: userInput },
       });
-      
+
       // Clear input and set typing indicator
       setUserInput("");
       dispatch({ type: "SET_TYPING", payload: true });
-      
+
       await sleep(500); // Small delay before sending to API
-      
+
       // Get response from API
       const response = await sendMessage(
         userInput,
@@ -200,21 +203,21 @@ export default function ChatInterface() {
         settings.model,
         state.selectedLanguage
       );
-      
+
       // Move to next step
       dispatch({ type: "SET_STEP", payload: (state.currentStep + 1) as ChatStep });
-      
+
       // Add assistant message after a short delay
       await sleep(1000); // Simulate typing delay
-      
+
       dispatch({
         type: "ADD_MESSAGE",
         payload: { role: "assistant", content: response.message },
       });
-      
+
       // Set quick responses if provided
       dispatch({ type: "SET_QUICK_RESPONSES", payload: response.quickResponses });
-      
+
       // Check if chat is complete
       if (response.isComplete || state.currentStep >= ChatStep.COMPLETE) {
         // Generate recommendation
@@ -224,7 +227,7 @@ export default function ChatInterface() {
           state: { recommendation: recommendation.recommendation } 
         });
       }
-      
+
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
@@ -232,30 +235,30 @@ export default function ChatInterface() {
       setIsProcessing(false);
     }
   };
-  
+
   const handleQuickResponse = (response: string) => {
     // Si es selección de idioma y no hay idioma seleccionado
     if (!state.selectedLanguage && state.messages.length === 1 && 
         (response === "Español" || response === "English")) {
       const detectedLanguage: 'es' | 'en' = response === "English" ? 'en' : 'es';
-      
+
       // Establecer el idioma directamente aquí
       dispatch({ type: "SET_LANGUAGE", payload: detectedLanguage });
-      
+
       // Actualizar los ajustes de IA
       setLanguage(detectedLanguage);
-      
+
       // Enviar el mensaje seleccionado
       setUserInput(response);
       handleSendMessage();
       return;
     }
-    
+
     // Caso normal para otras respuestas rápidas
     setUserInput(response);
     handleSendMessage();
   };
-  
+
   return (
     <div className="container mx-auto px-4 h-full flex flex-col pt-6 pb-10">
       <div className="mb-8 text-center">
@@ -285,12 +288,12 @@ export default function ChatInterface() {
               {messages.idealPerfume}
             </p>
           </div>
-          
+
           {/* Controles de síntesis de voz */}
           <TextToSpeechControls gender={state.selectedGender} />
         </div>
       </div>
-      
+
       <div className="futuristic-card flex-grow flex flex-col max-w-3xl mx-auto w-full bg-card/90 backdrop-blur-md">
         {/* Chat Progress Indicator */}
         <div className="w-full px-4 py-3 border-b border-border/50">
@@ -313,7 +316,7 @@ export default function ChatInterface() {
             <span>{messages.preferences}</span>
           </div>
         </div>
-        
+
         {/* Chat Messages */}
         <div 
           ref={chatContainerRef}
@@ -333,7 +336,7 @@ export default function ChatInterface() {
                     <Bot className="w-5 h-5 text-primary" />
                   </div>
                 )}
-                
+
                 <div
                   className={`${
                     message.role === "user"
@@ -359,7 +362,7 @@ export default function ChatInterface() {
                       if (formattedText.trim().startsWith('- ')) {
                         formattedText = `<span class="flex"><span class="mr-2">•</span><span>${formattedText.substring(2)}</span></span>`;
                       }
-                      
+
                       return (
                         <p 
                           key={i} 
@@ -370,7 +373,7 @@ export default function ChatInterface() {
                     })}
                   </div>
                 </div>
-                
+
                 {message.role === "user" && (
                   <div className="w-10 h-10 rounded-full bg-accent/10 backdrop-blur-sm flex items-center justify-center border border-accent/20 flex-shrink-0 ml-3">
                     <User className="w-5 h-5 text-accent" />
@@ -378,7 +381,7 @@ export default function ChatInterface() {
                 )}
               </div>
             ))}
-            
+
             {/* Typing indicator */}
             {state.isTyping && (
               <div className="chat-message flex items-start">
@@ -397,7 +400,7 @@ export default function ChatInterface() {
             )}
             <div ref={messagesEndRef} />
           </div>
-          
+
           {/* Botón para subir cuando hay muchos mensajes */}
           {state.messages.length > 5 && (
             <button
@@ -411,7 +414,7 @@ export default function ChatInterface() {
             </button>
           )}
         </div>
-        
+
         {/* Chat Input */}
         <div className="p-4 border-t border-border/50 bg-card/30 sticky bottom-0 z-20">
           <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
@@ -419,7 +422,7 @@ export default function ChatInterface() {
               onResult={(text) => setUserInput(text)}
               className="flex"
             />
-            
+
             <div className="relative flex-grow">
               <input
                 type="text"
@@ -456,7 +459,7 @@ export default function ChatInterface() {
               {messages.sendMessage}
             </button>
           </form>
-          
+
           {/* Quick Responses */}
           {state.quickResponses && state.quickResponses.length > 0 && !state.isTyping && (
             <div className="flex flex-wrap gap-2 mt-4 mb-2 pb-2">
