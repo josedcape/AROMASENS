@@ -30,13 +30,13 @@ export default function ChatInterface() {
     });
   };
   
-  // Scroll to bottom whenever messages change
+  // Scroll to bottom whenever messages change or when el input recibe focus
   useEffect(() => {
     if (messagesEndRef.current) {
-      // Aseguramos un scroll más fiable
-      setTimeout(() => {
+      // Usamos requestAnimationFrame para un scroll más confiable
+      requestAnimationFrame(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-      }, 100);
+      });
     }
     
     // Leer en voz alta el último mensaje del asistente si TTS está activado
@@ -425,6 +425,10 @@ export default function ChatInterface() {
                 type="text"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
+                onFocus={() => {
+                  // Asegurar que la vista se mantenga en el área de entrada cuando se enfoca
+                  setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 100);
+                }}
                 className="w-full bg-background/50 backdrop-blur-sm border border-border rounded-l-full py-3 px-5 pr-12 focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-all duration-300"
                 placeholder={messages.typeMessage}
                 disabled={state.isTyping || isProcessing}

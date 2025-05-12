@@ -54,12 +54,27 @@
     @apply border-border;
   }
 
-  body {
+  html, body {
     @apply font-sans antialiased bg-background text-foreground;
+    overflow-x: hidden;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    overscroll-behavior-y: none; /* Previene el rebote en iOS */
+  }
+
+  body:has(.chat-container) {
+    overflow-y: auto;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif; /* Usamos Cinzel para títulos elegantes */
+  }
+
+  /* Previene desplazamiento inesperado al enfocar campos de texto en móviles */
+  input, textarea, select, button {
+    font-size: 16px; /* Previene zoom en iOS */
   }
 }
 
@@ -244,6 +259,15 @@
   .chat-container {
     scrollbar-width: thin;
     scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+    -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+    position: relative;
+    max-height: calc(70vh - 180px); /* Ajustar altura máxima */
+  }
+
+  @media (max-height: 700px) {
+    .chat-container {
+      max-height: calc(60vh - 100px); /* Ajuste para pantallas pequeñas */
+    }
   }
 
   /* Hide scrollbar completely if needed */
