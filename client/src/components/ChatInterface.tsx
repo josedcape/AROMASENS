@@ -417,7 +417,7 @@ export default function ChatInterface() {
           <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
             <SpeechRecognitionButton 
               onResult={(text) => setUserInput(text)}
-              className="hidden sm:flex"
+              className="flex"
             />
             
             <div className="relative flex-grow">

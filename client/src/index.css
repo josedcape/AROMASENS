@@ -62,6 +62,7 @@
     height: 100%;
     min-height: 100vh;
     overscroll-behavior-y: none; /* Previene el rebote en iOS */
+    -webkit-tap-highlight-color: transparent; /* Elimina el resaltado al tocar en móviles */
   }
 
   body:has(.chat-container) {
@@ -263,6 +264,7 @@
     position: relative;
     max-height: calc(60vh - 120px); /* Ajustar altura máxima */
     padding-bottom: 70px; /* Espacio para que el campo de entrada sea visible */
+    overscroll-behavior: contain; /* Evita rebotes de scroll en móviles */
   }
 
   @media (max-height: 700px) {
@@ -270,10 +272,11 @@
       max-height: calc(50vh - 80px); /* Ajuste para pantallas pequeñas */
     }
   }
-  
+
   @media (max-width: 640px) {
     .chat-container {
       max-height: calc(50vh - 60px); /* Aún más pequeño para móviles */
+      padding-bottom: 80px; /* Ajuste para móviles */
     }
   }
 

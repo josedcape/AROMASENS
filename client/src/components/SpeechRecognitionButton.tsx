@@ -90,7 +90,7 @@ export default function SpeechRecognitionButton({
         isListening 
           ? 'bg-primary text-white' 
           : 'bg-accent/10 text-accent hover:bg-accent/20'
-      } rounded-full p-3 transition-all duration-300`}
+      } rounded-full p-3 transition-all duration-300 shadow-md hover:shadow-lg`}
       title={isListening ? messages.stopListening : messages.startListening}
       aria-label={isListening ? messages.stopListening : messages.startListening}
     >
@@ -103,9 +103,13 @@ export default function SpeechRecognitionButton({
               <span className="absolute inset-[-4px] rounded-full animate-pulse opacity-50 bg-primary"></span>
             </>
           )}
+          <span className="sr-only">{messages.stopListening}</span>
         </>
       ) : (
-        <Mic className="w-5 h-5" />
+        <>
+          <Mic className="w-5 h-5" />
+          <span className="sr-only">{messages.startListening}</span>
+        </>
       )}
     </button>
   );
